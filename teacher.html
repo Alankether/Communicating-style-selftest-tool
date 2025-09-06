@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老师管理员页面 - 沟通风格自我测评</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        /* 密码保护样式 */
+        .password-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .password-form {
+            background-color: white;
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .password-form h2 {
+            color: #4a5568;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+        
+        .password-input:focus {
+            border-color: #48bb78;
+        }
+        
+        .password-submit {
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #48bb78;
+            color: white;
+        }
+        
+        .password-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+            background-color: #38a169;
+        }
+        
+        .password-error {
+            color: #e53e3e;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        /* 数据统计摘要 */
+        .summary-section {
+            background-color: #f8fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .summary-section h2 {
+            color: #4a5568;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .summary-stat {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .summary-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #48bb78;
+            margin-bottom: 5px;
+        }
+        
+        .summary-stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        /* 表格样式 */
+        .data-table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .data-table th {
+            background-color: #f7fff7;
+            color: #2d3748;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .pagination button {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background-color: white;
+            color: #4a5568;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background-color: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination-info {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        /* 空数据提示 */
+        .empty-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+        
+        .empty-data h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .summary-stat {
+                min-width: 120px;
+                padding: 15px;
+            }
+            
+            .summary-stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .summary-stats {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .summary-stat {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码保护页面 -->
+    <div class="password-container" id="passwordContainer">
+        <div class="password-form">
+            <h2>老师管理员页面</h2>
+            <input type="password" class="password-input" id="adminPassword" placeholder="请输入密码" maxlength="6">
+            <button class="password-submit" id="passwordSubmit">登录</button>
+            <div class="password-error" id="passwordError">密码错误，请重试</div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
+        <div class="header">
+            <h1>老师管理员页面 - 沟通风格自我测评</h1>
+            <p>查看所有用户的测试结果和统计数据</p>
+        </div>
+        
+        <!-- 数据统计摘要 -->
+        <div class="summary-section">
+            <h2>统计摘要</h2>
+            <div class="summary-stats">
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="totalUsers">0</div>
+                    <div class="summary-stat-label">总测试人数</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="avgScoreI">0</div>
+                    <div class="summary-stat-label">平均Ⅰ得分</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="avgScoreII">0</div>
+                    <div class="summary-stat-label">平均Ⅱ得分</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="avgScoreIII">0</div>
+                    <div class="summary-stat-label">平均Ⅲ得分</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value" id="avgScoreIV">0</div>
+                    <div class="summary-stat-label">平均Ⅳ得分</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 数据表格容器 -->
+        <div class="data-table-container">
+            <table class="data-table" id="userDataTable">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>用户名</th>
+                        <th>提交时间</th>
+                        <th>Ⅰ</th>
+                        <th>Ⅱ</th>
+                        <th>Ⅲ</th>
+                        <th>Ⅳ</th>
+                        <th>Q1</th>
+                        <th>Q2</th>
+                        <th>Q3</th>
+                        <th>Q4</th>
+                        <th>Q5</th>
+                        <th>Q6</th>
+                        <th>Q7</th>
+                        <th>Q8</th>
+                        <th>Q9</th>
+                        <th>Q10</th>
+                        <th>Q11</th>
+                        <th>Q12</th>
+                        <th>Q13</th>
+                        <th>Q14</th>
+                        <th>Q15</th>
+                        <th>Q16</th>
+                        <th>Q17</th>
+                        <th>Q18</th>
+                    </tr>
+                </thead>
+                <tbody id="userDataBody">
+                    <!-- 数据将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+            
+            <!-- 空数据提示 -->
+            <div class="empty-data" id="emptyData提示" style="display: none;">
+                <h3>暂无测试数据</h3>
+                <p>还没有用户完成测试，请稍后再查看。</p>
+            </div>
+        </div>
+        
+        <!-- 分页控件 -->
+        <div class="pagination">
+            <button id="prevPage" disabled>上一页</button>
+            <span class="pagination-info" id="pageInfo">第 1 页，共 0 页</span>
+            <button id="nextPage" disabled>下一页</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const passwordContainerEl = document.getElementById('passwordContainer');
+        const adminPasswordEl = document.getElementById('adminPassword');
+        const passwordSubmitEl = document.getElementById('passwordSubmit');
+        const passwordErrorEl = document.getElementById('passwordError');
+        const mainContainerEl = document.getElementById('mainContainer');
+        const userDataTableEl = document.getElementById('userDataTable');
+        const userDataBodyEl = document.getElementById('userDataBody');
+        const emptyData提示El = document.getElementById('emptyData提示');
+        const prevPageButtonEl = document.getElementById('prevPage');
+        const nextPageButtonEl = document.getElementById('nextPage');
+        const pageInfoEl = document.getElementById('pageInfo');
+        const totalUsersEl = document.getElementById('totalUsers');
+        const avgScoreIEl = document.getElementById('avgScoreI');
+        const avgScoreIIEl = document.getElementById('avgScoreII');
+        const avgScoreIIIEl = document.getElementById('avgScoreIII');
+        const avgScoreIVEl = document.getElementById('avgScoreIV');
+        
+        // 管理员密码
+        const ADMIN_PASSWORD = '1080';
+        
+        // 密码验证
+        function validatePassword() {
+            const password = adminPasswordEl.value.trim();
+            
+            if (password === ADMIN_PASSWORD) {
+                // 密码正确，显示主页面
+                passwordErrorEl.style.display = 'none';
+                passwordContainerEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    passwordContainerEl.style.display = 'none';
+                    mainContainerEl.style.display = 'block';
+                    
+                    // 页面完全显示后初始化数据
+                    setTimeout(() => {
+                        initPage();
+                    }, 100);
+                }, 500);
+            } else {
+                // 密码错误，显示错误提示
+                passwordErrorEl.style.display = 'block';
+                adminPasswordEl.focus();
+            }
+        }
+        
+        // 设置密码验证事件监听器
+        function setupPasswordListeners() {
+            passwordSubmitEl.addEventListener('click', validatePassword);
+            
+            // 监听回车键提交密码
+            adminPasswordEl.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    validatePassword();
+                }
+            });
+            
+            // 自动聚焦到密码输入框
+            adminPasswordEl.focus();
+        }
+        
+        // 分页配置
+        const pageSize = 10; // 每页显示的用户数量
+        let currentPage = 1;
+        let allUsers = [];
+        let paginatedUsers = [];
+        
+        // 初始化页面
+        function initPage() {
+            // 加载用户数据
+            loadUserData();
+            
+            // 设置分页事件监听器
+            prevPageButtonEl.addEventListener('click', goToPrevPage);
+            nextPageButtonEl.addEventListener('click', goToNextPage);
+        }
+        
+        // 加载用户数据
+        function loadUserData() {
+            try {
+                // 从本地存储获取所有用户数据
+                const savedData = localStorage.getItem('communicationTestUsers');
+                if (savedData) {
+                    allUsers = JSON.parse(savedData);
+                    // 按提交时间倒序排序
+                    allUsers.sort((a, b) => new Date(b.submitTime) - new Date(a.submitTime));
+                }
+                
+                // 更新统计摘要
+                updateSummaryStats();
+                
+                // 生成分页数据
+                paginateUsers();
+                
+                // 显示当前页数据
+                displayCurrentPage();
+                
+                // 更新分页信息
+                updatePaginationInfo();
+                
+                // 显示或隐藏空数据提示
+                if (allUsers.length === 0) {
+                    userDataTableEl.style.display = 'none';
+                    emptyData提示El.style.display = 'block';
+                } else {
+                    userDataTableEl.style.display = 'table';
+                    emptyData提示El.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('加载用户数据失败:', e);
+                alert('加载用户数据失败，请刷新页面重试。');
+            }
+        }
+        
+        // 更新统计摘要
+        function updateSummaryStats() {
+            // 总测试人数
+            totalUsersEl.textContent = allUsers.length;
+            
+            if (allUsers.length === 0) {
+                avgScoreIEl.textContent = '0';
+                avgScoreIIEl.textContent = '0';
+                avgScoreIIIEl.textContent = '0';
+                avgScoreIVEl.textContent = '0';
+                return;
+            }
+            
+            // 计算平均得分
+            let totalI = 0, totalII = 0, totalIII = 0, totalIV = 0;
+            
+            allUsers.forEach(user => {
+                totalI += user.statistics?.i || 0;
+                totalII += user.statistics?.ii || 0;
+                totalIII += user.statistics?.iii || 0;
+                totalIV += user.statistics?.iv || 0;
+            });
+            
+            avgScoreIEl.textContent = (totalI / allUsers.length).toFixed(1);
+            avgScoreIIEl.textContent = (totalII / allUsers.length).toFixed(1);
+            avgScoreIIIEl.textContent = (totalIII / allUsers.length).toFixed(1);
+            avgScoreIVEl.textContent = (totalIV / allUsers.length).toFixed(1);
+        }
+        
+        // 生成分页数据
+        function paginateUsers() {
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            paginatedUsers = allUsers.slice(startIndex, endIndex);
+        }
+        
+        // 显示当前页数据
+        function displayCurrentPage() {
+            // 清空表格内容
+            userDataBodyEl.innerHTML = '';
+            
+            // 添加当前页的用户数据
+            paginatedUsers.forEach((user, index) => {
+                const row = document.createElement('tr');
+                const absoluteIndex = (currentPage - 1) * pageSize + index + 1;
+                
+                // 构建行内容
+                row.innerHTML = `
+                    <td>${absoluteIndex}</td>
+                    <td>${user.name || '-'}</td>
+                    <td>${user.submitTime || '-'}</td>
+                    <td>${user.statistics?.i || 0}</td>
+                    <td>${user.statistics?.ii || 0}</td>
+                    <td>${user.statistics?.iii || 0}</td>
+                    <td>${user.statistics?.iv || 0}</td>
+                    ${generateAnswersCells(user.answers)}
+                `;
+                
+                userDataBodyEl.appendChild(row);
+            });
+        }
+        
+        // 生成答案单元格
+        function generateAnswersCells(answers) {
+            if (!answers || answers.length === 0) {
+                // 返回18个空单元格
+                return Array(18).fill('<td>-</td>').join('');
+            }
+            
+            // 生成答案单元格，最多18个
+            let cells = '';
+            for (let i = 0; i < 18; i++) {
+                const answer = answers[i] || '-';
+                cells += `<td>${answer}</td>`;
+            }
+            
+            return cells;
+        }
+        
+        // 更新分页信息
+        function updatePaginationInfo() {
+            const totalPages = Math.ceil(allUsers.length / pageSize);
+            pageInfoEl.textContent = `第 ${currentPage} 页，共 ${totalPages} 页`;
+            
+            // 更新分页按钮状态
+            prevPageButtonEl.disabled = currentPage === 1;
+            nextPageButtonEl.disabled = currentPage >= totalPages;
+        }
+        
+        // 上一页
+        function goToPrevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                paginateUsers();
+                displayCurrentPage();
+                updatePaginationInfo();
+                // 滚动到表格顶部
+                userDataTableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        // 下一页
+        function goToNextPage() {
+            const totalPages = Math.ceil(allUsers.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                paginateUsers();
+                displayCurrentPage();
+                updatePaginationInfo();
+                // 滚动到表格顶部
+                userDataTableEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        // 页面加载完成后首先设置密码验证
+        window.addEventListener('DOMContentLoaded', setupPasswordListeners);
+    </script>
+</body>
+</html>

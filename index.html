@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沟通风格自我测评</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入Chart.js库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* 开始页面样式 */
+        .start-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1498550744921-75f79806b8a7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .start-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+        
+        .start-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .start-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin-bottom: 40px;
+            padding: 0 20px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        .start-button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 30px;
+            background-color: #48bb78;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+            background-color: #38a169;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 结果表格样式 */
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-table th,
+        .result-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .result-table th {
+            background-color: #f7fff7;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .result-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .result-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .answer-cell {
+            font-weight: 600;
+            color: #48bb78;
+        }
+        
+        /* 统计结果部分样式 */
+        .statistics-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .statistics-section h3 {
+            color: #4a5568;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .statistics-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #f7fff7;
+            border-radius: 8px;
+            min-width: 80px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #48bb78;
+        }
+        
+        /* 柱状图容器样式 */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        /* 分析文案样式 */
+        .analysis-text {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            line-height: 1.8;
+            color: #4a5568;
+            text-align: center;
+        }
+        
+        /* 结果容器美化 */
+        .result-container {
+            background-image: url('https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            z-index: -1;
+        }
+        
+        /* 容器初始隐藏，通过JS控制显示 */
+        .container {
+            display: none;
+        }
+        
+        /* 用户名字填写页面样式 */
+        .name-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1498550744921-75f79806b8a7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            z-index: 999;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .name-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+        
+        .name-content {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .name-content h2 {
+            color: #4a5568;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+        }
+        
+        .name-input-container {
+            margin-bottom: 30px;
+        }
+        
+        #userName {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            margin-bottom: 8px;
+        }
+        
+        #userName:focus {
+            border-color: #48bb78;
+        }
+        
+        .input-hint {
+            color: #718096;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        
+        .btn-primary {
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #48bb78;
+            color: white;
+            min-width: 120px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+            background-color: #38a169;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 767px) {
+            .name-content {
+                padding: 30px 20px;
+                width: 95%;
+            }
+            
+            .name-content h2 {
+                font-size: 1.5rem;
+            }
+            
+            #userName {
+                font-size: 1rem;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 开始页面 -->
+        <div class="start-container" id="startContainer">
+            <h1 class="start-title">【沟通风格自我测评】</h1>
+            <p class="start-description">【依据以下各题描述的情况，勾选其中最适合你实际状况的行为反应。记住要挑选其中"最适合、最符合自己实际行为"的答案，据实作答】</p>
+            <button class="start-button" id="startButton">开始测试</button>
+        </div>
+        
+        <!-- 用户名字填写页面 -->
+        <div class="name-container" id="nameContainer" style="display: none;">
+            <div class="name-content">
+                <h2>请输入您的姓名</h2>
+                <div class="name-input-container">
+                    <input type="text" id="userName" placeholder="请输入您的姓名" maxlength="20">
+                    <div class="input-hint">（必填，仅用于测试结果记录）</div>
+                </div>
+                <button class="btn btn-primary" id="confirmNameButton">确定</button>
+            </div>
+        </div>
+
+    <!-- 主测试容器 -->
+    <div class="container">
+        <!-- 测试标题部分 -->
+        <div class="test-header">
+            <h1>沟通风格自我测评</h1>
+            <!-- 隐藏测试描述文字 -->
+            <p class="test-description" style="display: none;">依据以下各题描述的情况，勾选其中最适合你实际状况的行为反应。记住要挑选其中"最适合、最符合自己实际行为"的答案，据实作答。</p>
+        </div>
+
+        <!-- 进度条部分 -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">1/18</div>
+        </div>
+
+        <!-- 测试题目容器 -->
+        <div class="test-container">
+            <!-- 题目将通过JavaScript动态加载 -->
+            <div class="question-card" id="questionCard">
+                <h2 class="question-number" id="questionNumber"></h2>
+                <p class="question-text" id="questionText"></p>
+                <div class="options-container" id="optionsContainer"></div>
+            </div>
+        </div>
+
+        <!-- 导航按钮 -->
+        <div class="navigation-buttons">
+            <button class="btn" id="prevButton" disabled>上一题</button>
+            <button class="btn" id="nextButton">下一题</button>
+            <button class="btn btn-submit" id="submitButton" style="display: none;">提交测试</button>
+        </div>
+
+        <!-- 结果页面 -->
+        <div class="result-container" id="resultContainer" style="display: none;">
+            <h2>测试结果</h2>
+            <div class="result-content">
+                <p>感谢您完成测试！以下是您的答题情况：</p>
+                <!-- 隐藏的结果表格，用于数据处理但不显示 -->
+                <table class="result-table" id="resultTable" style="display: none;"></table>
+                
+                <!-- 统计结果和柱状图 -->
+                <div class="statistics-section">
+                    <h3>测试结果分析</h3>
+                    <div class="statistics-container">
+                        <div class="stat-item">
+                            <span class="stat-label">Ⅰ:</span>
+                            <span class="stat-value" id="statI">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Ⅱ:</span>
+                            <span class="stat-value" id="statII">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Ⅲ:</span>
+                            <span class="stat-value" id="statIII">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Ⅳ:</span>
+                            <span class="stat-value" id="statIV">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 柱状图容器 -->
+                    <div class="chart-container">
+                        <canvas id="resultChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 分析文案 -->
+                <div class="analysis-text">
+                    <p>我们每个人都有一套自己的行为模式。这种行为模式透露出个人的决策模式及与他人沟通的方式。如果我们能确认自己与他人沟通的方式，便可以了解别人是如何看待自己的，也就能避免不具生产力的行为及学习如何控制自己的沟通影响方式，以有效的影响对方。</p>
+                </div>
+                
+                <button class="btn" id="restartButton">重新测试</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 测试数据生成脚本（首次访问时自动添加示例数据） -->
+    <script src="testData.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
